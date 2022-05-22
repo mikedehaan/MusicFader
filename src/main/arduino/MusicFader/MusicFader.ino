@@ -46,17 +46,31 @@ void oscSetup() {
     String ipAddressString;
     ipAddressString += WiFi.localIP().toString();
 
-    // Parse 192.168.1.x and turn it into 192.168.1.255
-    int ind1 = ipAddressString.indexOf('.');          //finds location of first .
-    int ind2 = ipAddressString.indexOf('.', ind1+1 ); //finds location of second .
-    int ind3 = ipAddressString.indexOf('.', ind2+1 );
+    Serial.print("NETMASK: ");
+    Serial.println(WiFi.subnetMask());
+
+    uint8_t  netAddress1 = WiFi.localIP()[0] & WiFi.subnetMask()[0];
+    uint8_t  netAddress2 = WiFi.localIP()[1] & WiFi.subnetMask()[1];
+    uint8_t  netAddress3 = WiFi.localIP()[2] & WiFi.subnetMask()[2];
+    uint8_t  netAddress4 = WiFi.localIP()[3] & WiFi.subnetMask()[3];
+
+    uint8_t  broadcast1 = netAddress1 | ~WiFi.subnetMask()[0];
+    uint8_t  broadcast2 = netAddress2 | ~WiFi.subnetMask()[1];
+    uint8_t  broadcast3 = netAddress3 | ~WiFi.subnetMask()[2];
+    uint8_t  broadcast4 = netAddress4 | ~WiFi.subnetMask()[3];
 
     String broadcastString;
-    broadcastString = ipAddressString.substring(0, ind3+1);
-    broadcastString += "255";
+    broadcastString += broadcast1;
+    broadcastString += ".";
+    broadcastString += broadcast2;
+    broadcastString += ".";
+    broadcastString += broadcast3;
+    broadcastString += ".";
+    broadcastString += broadcast4;
 
     IPAddress broadcastIp;
     broadcastIp.fromString(broadcastString);
+    Serial.print("Broadcast IP: ");
     Serial.println(broadcastIp);
 
     // At this point, we're on the network.

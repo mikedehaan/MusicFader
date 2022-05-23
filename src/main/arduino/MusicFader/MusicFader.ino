@@ -6,10 +6,26 @@
 #include "Fader.h"
 
 /* Set these to your desired credentials. */
-const char *ssid     = ""; //Enter your WIFI ssid
-const char *password = ""; //Enter your WIFI password
+//const char *ssid     = ""; //Enter your WIFI ssid
+//const char *password = ""; //Enter your WIFI password
+
+/* Don't set this wifi credentials. They are configurated at runtime and stored on EEPROM */
+char ssid[33] = "";
+char password[65] = "";
+
+struct EepromSavedData {
+    char ssid[33];
+    char password[65];
+    char fader1Bus[2];
+    char fader1Channel[2];
+    char fader2Bus[2];
+    char fader2Channel[2];
+};
+
+EepromSavedData eepromSavedData;
 
 #define UDP_PORT 10024
+#define SETUP_SWITCH D4
 
 #define MUX_S0  D0
 #define MUX_S1  D1
@@ -17,7 +33,12 @@ const char *password = ""; //Enter your WIFI password
 #define MUX_S3  D3
 #define MUX_SIG A0
 
+#define STATE_SETUP   0
+#define STATE_RUNTIME 1
+
 const unsigned int inPort = 8888;
+
+int systemState = 0;
 
 Fader *fader1;
 Fader *fader2;
@@ -27,10 +48,18 @@ void muxSetup();
 void oscSetup() {
     pinMode(LED_BUILTIN, OUTPUT);
     delay(1000);
-    Serial.begin(115200);
+
+    loadCredentials();
+
     Serial.println();
     Serial.print("Configuring access point...");
-    WiFi.begin(ssid, password);
+
+    String ssidString = "";
+    String passwordString = "";
+    ssidString += eepromSavedData.ssid;
+    passwordString += eepromSavedData.password;
+    
+    WiFi.begin(ssidString, passwordString);
 
     while (WiFi.status() != WL_CONNECTED) {
         delay(500);
@@ -99,26 +128,43 @@ void oscSetup() {
 }
 
 void setup() {
-    oscSetup();
-    muxSetup();
+    delay(1000);  
+    Serial.begin(115200);    
+    pinMode(SETUP_SWITCH, INPUT);
+    int buttonState = digitalRead(SETUP_SWITCH);
+
+    if (buttonState == HIGH) {
+        Serial.println("Setup switch is on.");
+        systemState = STATE_SETUP;
+        captivePortalSetup();
+    } else {
+        Serial.println("Setup switch is off.");
+        systemState = STATE_RUNTIME;
+        oscSetup();
+        muxSetup();
+    }
 }
 
 void loop() {
-    if (!mixer->connected) {
-        // Broadcast a request for all mixers to respond
-        // Only send this once
-        if (!mixer->wasFindRequestSent()) {
-            mixer->findMixers();
-        }
+    if (systemState == STATE_RUNTIME) {
+        if (!mixer->connected) {
+            // Broadcast a request for all mixers to respond
+            // Only send this once
+            if (!mixer->wasFindRequestSent()) {
+                mixer->findMixers();
+            }
     
-        // Listen for a response from the mixer.
-        mixer->receiveData();
-    } else {
-        fader1->run();
-        //fader2->run();
-        mixer->run();
+            // Listen for a response from the mixer.
+            mixer->receiveData();
+        } else {
+            fader1->run();
+            //fader2->run();
+            mixer->run();
 
-        mixer->receiveData();
+            mixer->receiveData();
+        }
+    } else if (systemState == STATE_SETUP) {
+        captivePortalLoop();
     }
 }
 

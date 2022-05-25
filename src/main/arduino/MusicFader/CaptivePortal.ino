@@ -63,22 +63,27 @@ void captivePortalSetup() {
     dnsServer.start(DNS_PORT, "*", apIP);
 
     /* Setup web pages: root, wifi config pages, SO captive portal detectors and not found. */
-    server.on("/", handleRoot);
+    //server.on("/", handleRoot);
+    //server.on("/generate_204", handleRoot);  // Android captive portal. Maybe not needed. Might be handled by notFound handler.
+    //server.on("/fwlink", handleRoot);        // Microsoft captive portal. Maybe not needed. Might be handled by notFound handler.
+
+    server.on("/", handleWifi);
+    server.on("/generate_204", handleWifi);  // Android captive portal. Maybe not needed. Might be handled by notFound handler.
+    server.on("/fwlink", handleWifi);        // Microsoft captive portal. Maybe not needed. Might be handled by notFound handler.
+    
     server.on("/wifi", handleWifi);
     server.on("/wifisave", handleWifiSave);
-    server.on("/generate_204", handleRoot);  // Android captive portal. Maybe not needed. Might be handled by notFound handler.
-    server.on("/fwlink", handleRoot);        // Microsoft captive portal. Maybe not needed. Might be handled by notFound handler.
     server.onNotFound(handleNotFound);
     server.begin();  // Web server start
     Serial.println("HTTP server started");
     loadCredentials();           // Load WLAN credentials from network
-    connect = strlen(ssid) > 0;  // Request WLAN connect if there is a SSID
+    connect = strlen(eepromSavedData.ssid) > 0;  // Request WLAN connect if there is a SSID
 }
 
 void connectWifi() {
     Serial.println("Connecting as wifi client...");
     WiFi.disconnect();
-    WiFi.begin(ssid, password);
+    WiFi.begin(eepromSavedData.ssid, eepromSavedData.password);
     int connRes = WiFi.waitForConnectResult();
     Serial.print("connRes: ");
     Serial.println(connRes);
@@ -107,7 +112,7 @@ void captivePortalLoop() {
             /* Just connected to WLAN */
             Serial.println("");
             Serial.print("Connected to ");
-            Serial.println(ssid);
+            Serial.println(eepromSavedData.ssid);
             Serial.print("IP address: ");
             Serial.println(WiFi.localIP());
 

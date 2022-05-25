@@ -1,6 +1,7 @@
 #include "Fader.h"
 #include <Arduino.h>
 #include "Mixer.h"
+#include "Global.h"
 
 Fader::Fader(int muxChannelNumber, int muxS0, int muxS1, int muxS2, int muxS3, int muxSig, Mixer *mixer, int bus, int channel) {
     this->muxChannelNumber = muxChannelNumber;
@@ -14,13 +15,23 @@ Fader::Fader(int muxChannelNumber, int muxS0, int muxS1, int muxS2, int muxS3, i
     this->channel = channel;
 }
 
-float Fader::getMixerValue() {
-    int muxValue = readMux(muxChannelNumber);
+int Fader::getRawValue() {
 
+    // read the value at the SIG pin
+    #ifdef USE_MUX
+    int val = readMux(muxChannelNumber);
+    #else
+    int val = analogRead(muxSig);
+    #endif
+
+    return val;
+}
+
+float Fader::convertToMixerValue(int rawValue) {
     float currentValue = 0;
-    currentValue = muxValue;
-    currentValue = currentValue / 1024.0;
-    currentValue = round(currentValue * 100) / 100;
+    currentValue = (float)rawValue;
+    currentValue = currentValue / 1024.000;
+    currentValue = round(currentValue * 1000) / 1000;
 
     return currentValue;
 }
@@ -61,10 +72,10 @@ int Fader::readMux(int channel) {
 
 void Fader::run() {
 
-    float val = getMixerValue();
+    int val = getRawValue();
 
     // make sure there's a sizable enough difference to warrant a change
-    if (val != lastSentMixerValue && (abs(val - lastSentMixerValue) > 0.02)) {
+    if (val != lastSentMixerValue && (abs(val - lastSentMixerValue) > 10)) {
         Serial.print("New fader value...");
         Serial.print(val);
         Serial.println();
@@ -76,21 +87,24 @@ void Fader::run() {
     if(hasMessageToSend && ((unsigned long)(millis() - timeLastMessageSent) > SEND_INTERVAL)){
         timeLastMessageSent = millis();
         hasMessageToSend = false;
+
+        float convertedMixerValue = convertToMixerValue(lastSentMixerValue);
+
         Serial.print("Sending ");
-        Serial.print(lastSentMixerValue);
+        Serial.print(convertedMixerValue, 5);
         Serial.println(" to the mixer.");
 
         if (bus == 0) { // Treat as the front of house
             if (channel == 0) { // Treat as the Master Fader
-                mixer->setMainMasterVolume(lastSentMixerValue);
+                mixer->setMainMasterVolume(convertedMixerValue);
             } else if (channel > 0 && channel <= 16) {
-                mixer->setMainChannelVolume(channel, lastSentMixerValue);
+                mixer->setMainChannelVolume(channel, convertedMixerValue);
             }
         } else if (bus > 0 && bus <= 6) {
             if (channel == 0) { // Treat as the Master Fader
-                mixer->setBusMasterVolume(bus, lastSentMixerValue);
+                mixer->setBusMasterVolume(bus, convertedMixerValue);
             } else if (channel > 0 && channel <= 16) {
-                mixer->setBusChannelVolume(bus, channel, lastSentMixerValue);
+                mixer->setBusChannelVolume(bus, channel, convertedMixerValue);
             }
         }
         delay(SEND_INTERVAL);

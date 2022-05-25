@@ -21,7 +21,7 @@ class Fader {
         //Mux in "SIG" pin
         int muxSig;
 
-        float lastSentMixerValue;
+        int lastSentMixerValue;
         unsigned long timeLastMessageSent;
         bool hasMessageToSend;
 
@@ -32,7 +32,8 @@ class Fader {
 
     public:
         Fader(int muxChannelNumber, int muxS0, int muxS1, int muxS2, int muxS3, int muxSig, Mixer *mixer, int bus, int channel);
-        float getMixerValue();
+        int getRawValue();
+        float convertToMixerValue(int rawValue);
         void run();
 };
 

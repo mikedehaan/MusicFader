@@ -20,6 +20,16 @@ void loadCredentials() {
     }
     
     Serial.println("Recovered credentials:");
+
+    Serial.print("Bus 1: ");
+    Serial.println(eepromSavedData.fader1Bus);
+    Serial.print("Channel 1: ");
+    Serial.println(eepromSavedData.fader1Channel);
+    Serial.print("Bus 2: ");
+    Serial.println(eepromSavedData.fader2Bus);
+    Serial.print("Channel 2: ");
+    Serial.println(eepromSavedData.fader2Channel);
+    
     Serial.println(eepromSavedData.ssid);
     Serial.println(strlen(eepromSavedData.password) > 0 ? "********" : "<no password>");
 }

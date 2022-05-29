@@ -88,7 +88,7 @@ void Fader::run() {
     int val = getRawValue();
 
     // make sure there's a sizable enough difference to warrant a change
-    if (val != lastSentMixerValue && (abs(val - lastSentMixerValue) > 10)) {
+    if (val != lastSentMixerValue && (abs(val - lastSentMixerValue) > 20)) {
         Serial.print("New fader value...");
         Serial.print(val);
         Serial.println();

@@ -75,7 +75,7 @@ void Mixer::setMainMasterMute(bool mute) {
 }
 
 void Mixer::setBusChannelVolume(int busNumber, int channelNumber, float volumeLevel) {
-    String key("/ch/" + pad(busNumber) + "/mix/" + pad(channelNumber) + "/level");
+    String key("/ch/" + pad(channelNumber) + "/mix/" + pad(busNumber) + "/level");
     OSCMessage msg(key.c_str());
     msg.add(volumeLevel);
     sendOSCMessage(msg);

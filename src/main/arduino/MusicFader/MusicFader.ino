@@ -119,7 +119,10 @@ void oscSetup() {
     // /rtn/aux/mix/on
 
     fader1 = new Fader(0, MUX_S0, MUX_S1, MUX_S2, MUX_S3, MUX_SIG, mixer, bus, channel);
+
+    #ifdef USE_MUX
     fader2 = new Fader(1, MUX_S0, MUX_S1, MUX_S2, MUX_S3, MUX_SIG, mixer, eepromSavedData.fader2Bus, eepromSavedData.fader2Channel);
+    #endif
 }
 
 void setup() {
@@ -155,7 +158,9 @@ void loop() {
             mixer->receiveData();
         } else {
             fader1->run();
+            #ifdef USE_MUX
             fader2->run();
+            #endif
             mixer->run();
 
             mixer->receiveData();

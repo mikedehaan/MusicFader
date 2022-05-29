@@ -63,10 +63,6 @@ void captivePortalSetup() {
     dnsServer.start(DNS_PORT, "*", apIP);
 
     /* Setup web pages: root, wifi config pages, SO captive portal detectors and not found. */
-    //server.on("/", handleRoot);
-    //server.on("/generate_204", handleRoot);  // Android captive portal. Maybe not needed. Might be handled by notFound handler.
-    //server.on("/fwlink", handleRoot);        // Microsoft captive portal. Maybe not needed. Might be handled by notFound handler.
-
     server.on("/", handleWifi);
     server.on("/generate_204", handleWifi);  // Android captive portal. Maybe not needed. Might be handled by notFound handler.
     server.on("/fwlink", handleWifi);        // Microsoft captive portal. Maybe not needed. Might be handled by notFound handler.
@@ -90,6 +86,8 @@ void connectWifi() {
 }
 
 void captivePortalLoop() {
+
+/*
     if (connect) {
         Serial.println("Connect requested");
         connect = false;
@@ -99,8 +97,8 @@ void captivePortalLoop() {
 
     unsigned int s = WiFi.status();
     if (s == 0 && millis() > (lastConnectTry + 60000)) {
-        /* If WLAN disconnected and idle try to connect */
-        /* Don't set retry time too low as retry interfere the softAP operation */
+        // If WLAN disconnected and idle try to connect
+        // Don't set retry time too low as retry interfere the softAP operation
         connect = true;
     }
 
@@ -109,7 +107,7 @@ void captivePortalLoop() {
         Serial.println(s);
         status = s;
         if (s == WL_CONNECTED) {
-            /* Just connected to WLAN */
+            // Just connected to WLAN
             Serial.println("");
             Serial.print("Connected to ");
             Serial.println(eepromSavedData.ssid);
@@ -132,6 +130,8 @@ void captivePortalLoop() {
     if (s == WL_CONNECTED) {
         MDNS.update();
     }
+
+*/
 
     // Do work:
     // DNS

@@ -155,7 +155,7 @@ void loop() {
             mixer->receiveData();
         } else {
             fader1->run();
-            //fader2->run();
+            fader2->run();
             mixer->run();
 
             mixer->receiveData();
@@ -173,6 +173,16 @@ void muxSetup() {
     int s2 = MUX_S2;
     int s3 = MUX_S3;
 
+    Serial.println("Mux configured to use:");
+    Serial.print("S0: ");
+    Serial.println(s0);
+    Serial.print("S1: ");
+    Serial.println(s1);
+    Serial.print("S2: ");
+    Serial.println(s2);
+    Serial.print("S3: ");
+    Serial.println(s3);
+
     pinMode(s0, OUTPUT);
     pinMode(s1, OUTPUT);
     pinMode(s2, OUTPUT);
@@ -182,4 +192,6 @@ void muxSetup() {
     digitalWrite(s1, LOW);
     digitalWrite(s2, LOW);
     digitalWrite(s3, LOW);
+
+    Serial.println("Mux Intialized");    
 }

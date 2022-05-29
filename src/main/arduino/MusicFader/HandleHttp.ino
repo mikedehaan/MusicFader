@@ -23,31 +23,6 @@ String createDropDown(String title, String name, int min, int max, int selectedV
     return result;
 }
 
-/** Handle root or redirect to captive portal */
-void handleRoot() {
-    if (captivePortal()) {  // If captive portal redirect instead of displaying the page.
-        return;
-    }
-    server.sendHeader("Cache-Control", "no-cache, no-store, must-revalidate");
-    server.sendHeader("Pragma", "no-cache");
-    server.sendHeader("Expires", "-1");
-
-    String Page;
-    Page += F("<!DOCTYPE html><html lang='en'><head>"
-            "<meta name='viewport' content='width=device-width'>"
-            "<title>CaptivePortal</title></head><body>"
-            "<h1>HELLO WORLD!!</h1>");
-    if (server.client().localIP() == apIP) {
-        Page += String(F("<p>You are connected through the soft AP: ")) + softAP_ssid + F("</p>");
-    } else {
-        Page += String(F("<p>You are connected through the wifi network: ")) + eepromSavedData.ssid + F("</p>");
-    }
-    Page += F("<p>You may want to <a href='/wifi'>config the wifi connection</a>.</p>"
-            "</body></html>");
-
-    server.send(200, "text/html", Page);
-}
-
 /** Redirect to captive portal if we got a request for another domain. Return true in that case so the page handler do not try to handle the request again. */
 boolean captivePortal() {
     if (!isIp(server.hostHeader()) && server.hostHeader() != (String(myHostname) + ".local")) {
@@ -70,37 +45,19 @@ void handleWifi() {
     Page += F("<!DOCTYPE html><html lang='en'><head>"
             "<meta name='viewport' content='width=device-width'>"
             "<title>CaptivePortal</title></head><body>"
-            "<h1>Wifi config</h1>");
-    Page += F("<style>body { font-size: 2em; }select  { font-size: 1em; }</style>");
-    if (server.client().localIP() == apIP) {
-        Page += String(F("<p>You are connected through the soft AP: ")) + softAP_ssid + F("</p>");
-    } else {
-        Page += String(F("<p>You are connected through the wifi network: ")) + eepromSavedData.ssid + F("</p>");
-    }
-    Page += String(F("\r\n<br />"
-                   "<table><tr><th align='left'>SoftAP config</th></tr>"
-                   "<tr><td>SSID "))
-          + String(softAP_ssid) + F("</td></tr>"
-                                    "<tr><td>IP ")
-          + toStringIp(WiFi.softAPIP()) + F("</td></tr>"
-                                            "</table>"
-                                            "\r\n<br />"
-                                            "<table><tr><th align='left'>WLAN config</th></tr>"
-                                            "<tr><td>SSID ")
-          + String(eepromSavedData.ssid) + F("</td></tr>"
-                             "<tr><td>IP ")
-          + toStringIp(WiFi.localIP()) + F("</td></tr>"
-                                           "</table>"
-                                           "\r\n<br />"
-                                           "<table><tr><th align='left'>WLAN list (refresh if any missing)</th></tr>");
+            "<h3>Music Fader Setup</h1>");
+    Page += F("<style>body { font-size: 2em; }select  { font-size: 1em; } .sf { font-size: 8px; } .btn { height: 75px; width: 200px;}</style>");
+
+    Page += F("<table><tr><th align='left'>WLAN list</th></tr>");
     Serial.println("scan start");
     int n = WiFi.scanNetworks();
     Serial.println("scan done");
     if (n > 0) {
-        for (int i = 0; i < n; i++) { Page += String(F("\r\n<tr><td>SSID ")) + WiFi.SSID(i) + ((WiFi.encryptionType(i) == ENC_TYPE_NONE) ? F(" ") : F(" *")) + F(" (") + WiFi.RSSI(i) + F(")</td></tr>"); }
+        for (int i = 0; i < n; i++) { Page += String(F("\r\n<tr><td class='sf'>SSID ")) + WiFi.SSID(i) + ((WiFi.encryptionType(i) == ENC_TYPE_NONE) ? F(" ") : F(" *")) + F(" (") + WiFi.RSSI(i) + F(")</td></tr>"); }
     } else {
         Page += F("<tr><td>No WLAN found</td></tr>");
     }
+    Page += F("</table>\r\n<br />");
 
     String htmlSsid = "";
     htmlSsid += eepromSavedData.ssid;
@@ -108,8 +65,7 @@ void handleWifi() {
     String htmlPassword = "";
     htmlPassword += eepromSavedData.password;
 
-    Page += F("</table>"
-            "\r\n<br /><form method='POST' action='wifisave'><h4>Connect to network:</h4>");
+    Page += F("<form method='POST' action='wifisave'><b>Connect to network:</b><hr/>");
     Page += F("<input type='text' placeholder='network' name='n' value='");
     Page += htmlSsid;
     Page += F("'/>");
@@ -119,24 +75,35 @@ void handleWifi() {
     Page += F("<input type='password' placeholder='password' name='p' value='");
     Page += htmlPassword;
     Page += F("'/>");
-    Page += F("<br />");
+    Page += F("<br /><br />");
 
     // Fader 1
-    Page += F("<h2>Fader1</h2><br />");
+    Page += F("<b>Fader1</b><hr />");
     Page += createDropDown("Bus:",     "b1", 0, 6,  eepromSavedData.fader1Bus);
-    Page += F("<br />");
+    //Page += F("<br />");
     Page += createDropDown("Channel:", "c1", 0, 16, eepromSavedData.fader1Channel);
     Page += F("<br />");
 
     #ifdef USE_MUX
-    Page += F("<h2>Fader2</h2><br />");
+    Page += F("<b>Fader2</b><hr />");
     Page += createDropDown("Bus:",     "b2", 0, 6,  eepromSavedData.fader2Bus);
-    Page += F("<br />");
+    //Page += F("<br />");
     Page += createDropDown("Channel:", "c2", 0, 16, eepromSavedData.fader2Channel);
     #endif
 
-    Page += F("<br /><input type='submit' value='Save'/>");
-    Page += F("</form></body></html>");
+    Page += F("<br /><input type='submit' class='btn' value='Save'/>");
+    Page += F("</form><br/><br/><br/><br/>");
+
+    Page += String(F("<hr/><table><tr><th align='left'>Device Config</th></tr>"
+                   "<tr><td class='sf'>SSID "))
+          + String(softAP_ssid) + F("</td></tr>"
+                                    "<tr><td class='sf'>IP ")
+          + toStringIp(WiFi.softAPIP()) + F("</td></tr>"
+                                            "</table>"
+                                            "\r\n<br />");
+
+    Page += F("</body></html>");
+
             
     server.send(200, "text/html", Page);
     server.client().stop();  // Stop is needed because we sent no content length
@@ -164,8 +131,8 @@ void handleWifiSave() {
 }
 
 void handleNotFound() {
-    if (captivePortal()) {  // If caprive portal redirect instead of displaying the error page.
-    return;
+    if (captivePortal()) {  // If captive portal redirect instead of displaying the error page.
+        return;
     }
     String message = F("File Not Found\n\n");
     message += F("URI: ");

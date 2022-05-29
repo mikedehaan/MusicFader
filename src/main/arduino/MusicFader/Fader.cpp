@@ -13,6 +13,19 @@ Fader::Fader(int muxChannelNumber, int muxS0, int muxS1, int muxS2, int muxS3, i
     this->mixer   = mixer;
     this->bus     = bus;
     this->channel = channel;
+
+    Serial.println("Fader configured to use mux:");
+    Serial.print("S0: ");
+    Serial.println(muxS0);
+    Serial.print("S1: ");
+    Serial.println(muxS1);
+    Serial.print("S2: ");
+    Serial.println(muxS2);
+    Serial.print("S3: ");
+    Serial.println(muxS3);
+
+    Serial.print("Fader Channel: ");
+    Serial.println(muxChannelNumber);
 }
 
 int Fader::getRawValue() {
@@ -36,7 +49,7 @@ float Fader::convertToMixerValue(int rawValue) {
     return currentValue;
 }
 
-int Fader::readMux(int channel) {
+int Fader::readMux(int channelToRead) {
     int controlPin[] = {muxS0, muxS1, muxS2, muxS3};
 
     int muxChannel[16][4]={
@@ -60,7 +73,7 @@ int Fader::readMux(int channel) {
 
     // loop through the 4 sig
     for(int i = 0; i < 4; i ++){
-        digitalWrite(controlPin[i], muxChannel[channel][i]);
+        digitalWrite(controlPin[i], muxChannel[channelToRead][i]);
     }
 
     // read the value at the SIG pin

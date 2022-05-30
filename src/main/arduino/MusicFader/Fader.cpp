@@ -5,14 +5,14 @@
 
 Fader::Fader(int muxChannelNumber, int muxS0, int muxS1, int muxS2, int muxS3, int muxSig, Mixer *mixer, int bus, int channel) {
     this->muxChannelNumber = muxChannelNumber;
-    this->muxS0   = muxS0;
-    this->muxS1   = muxS1;
-    this->muxS2   = muxS2;
-    this->muxS3   = muxS3;
-    this->muxSig  = muxSig;
-    this->mixer   = mixer;
-    this->bus     = bus;
-    this->channel = channel;
+    this->muxS0       = muxS0;
+    this->muxS1       = muxS1;
+    this->muxS2       = muxS2;
+    this->muxS3       = muxS3;
+    this->muxSig      = muxSig;
+    this->mixer       = mixer;
+    this->bus         = bus;
+    this->channel     = channel;
 
     Serial.println("Fader configured to use mux:");
     Serial.print("S0: ");

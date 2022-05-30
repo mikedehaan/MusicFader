@@ -31,8 +31,8 @@ void Mixer::useMixer(IPAddress mixerAddress) {
 }
 
 void Mixer::sendHeartbeat() {
-  Serial.print("Heartbeat sent...");
-  Serial.println();
+  //Serial.print("Heartbeat sent...");
+  //Serial.println();
   
   OSCMessage msg("/xinfo");
   sendOSCMessage(msg);

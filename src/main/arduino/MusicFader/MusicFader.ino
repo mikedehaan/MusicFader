@@ -4,6 +4,7 @@
 #include <OSCBundle.h>
 #include "Mixer.h"
 #include "Fader.h"
+#include "Global.h"
 
 /* Don't set these wifi credentials. They are configured at runtime and stored on EEPROM */
 //char ssid[33] = "";
@@ -34,6 +35,7 @@ EepromSavedData eepromSavedData;
 const unsigned int inPort = 8888;
 
 int systemState = 0;
+unsigned int wifiStatus = 0;
 
 Fader *fader1;
 Fader *fader2;
@@ -42,6 +44,8 @@ void muxSetup();
 
 void oscSetup() {
     pinMode(LED_BUILTIN, OUTPUT);
+    WiFi.mode(WIFI_STA);
+    WiFi.setSleepMode(WIFI_NONE_SLEEP);
     delay(1000);
 
     loadCredentials();
@@ -65,6 +69,9 @@ void oscSetup() {
     Serial.println("WiFi connected");
     Serial.print("IP address: ");
     Serial.println(WiFi.localIP());
+
+    WiFi.setAutoReconnect(true);
+    WiFi.persistent(true);
 
     // Parse the localIP and change to the broadcast IP
     String ipAddressString;
@@ -163,8 +170,28 @@ void loop() {
             #endif
             mixer->run();
 
-            mixer->receiveData();
+            //mixer->receiveData();
         }
+
+
+        unsigned int s = WiFi.status();
+        if (s != wifiStatus) {
+            Serial.print("Wifi status changed from: ");
+            Serial.print(wifiStatus);
+            Serial.print(" to ");
+            Serial.println(s);
+
+            wifiStatus = s;
+        }
+
+/*
+        if (millis() % 1000 == 0) {
+            long rssi = WiFi.RSSI();
+            Serial.print("RSSI:");
+            Serial.println(rssi);
+        }
+        */
+        
     } else if (systemState == STATE_SETUP) {
         captivePortalLoop();
     }
@@ -200,3 +227,61 @@ void muxSetup() {
 
     Serial.println("Mux Intialized");    
 }
+
+
+
+/*
+
+
+
+#include <ESP8266WiFi.h>
+
+// Replace with your network credentials
+const char* ssid = "REPLACE_WITH_YOUR_SSID";
+const char* password = "REPLACE_WITH_YOUR_PASSWORD";
+
+WiFiEventHandler wifiConnectHandler;
+WiFiEventHandler wifiDisconnectHandler;
+
+void initWiFi() {
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(ssid, password);
+  Serial.print("Connecting to WiFi ..");
+  while (WiFi.status() != WL_CONNECTED) {
+    Serial.print('.');
+    delay(1000);
+  }
+  Serial.println(WiFi.localIP());
+}
+
+void onWifiConnect(const WiFiEventStationModeGotIP& event) {
+  Serial.println("Connected to Wi-Fi sucessfully.");
+  Serial.print("IP address: ");
+  Serial.println(WiFi.localIP());
+}
+
+void onWifiDisconnect(const WiFiEventStationModeDisconnected& event) {
+  Serial.println("Disconnected from Wi-Fi, trying to connect...");
+  WiFi.disconnect();
+  WiFi.begin(ssid, password);
+}
+
+void setup() {
+  Serial.begin(115200);
+
+  //Register event handlers
+  wifiConnectHandler = WiFi.onStationModeGotIP(onWifiConnect);
+  wifiDisconnectHandler = WiFi.onStationModeDisconnected(onWifiDisconnect);
+   
+  initWiFi();
+  Serial.print("RRSI: ");
+  Serial.println(WiFi.RSSI());
+}
+
+void loop() {
+  //delay(1000);
+}
+
+  
+  
+ */

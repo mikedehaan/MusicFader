@@ -6,10 +6,6 @@
 #include "Fader.h"
 #include "Global.h"
 
-/* Don't set these wifi credentials. They are configured at runtime and stored on EEPROM */
-//char ssid[33] = "";
-//char password[65] = "";
-
 struct EepromSavedData {
     char ssid[33];
     char password[65];
@@ -184,14 +180,6 @@ void loop() {
             wifiStatus = s;
         }
 
-/*
-        if (millis() % 1000 == 0) {
-            long rssi = WiFi.RSSI();
-            Serial.print("RSSI:");
-            Serial.println(rssi);
-        }
-        */
-        
     } else if (systemState == STATE_SETUP) {
         captivePortalLoop();
     }
@@ -227,61 +215,3 @@ void muxSetup() {
 
     Serial.println("Mux Intialized");    
 }
-
-
-
-/*
-
-
-
-#include <ESP8266WiFi.h>
-
-// Replace with your network credentials
-const char* ssid = "REPLACE_WITH_YOUR_SSID";
-const char* password = "REPLACE_WITH_YOUR_PASSWORD";
-
-WiFiEventHandler wifiConnectHandler;
-WiFiEventHandler wifiDisconnectHandler;
-
-void initWiFi() {
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(ssid, password);
-  Serial.print("Connecting to WiFi ..");
-  while (WiFi.status() != WL_CONNECTED) {
-    Serial.print('.');
-    delay(1000);
-  }
-  Serial.println(WiFi.localIP());
-}
-
-void onWifiConnect(const WiFiEventStationModeGotIP& event) {
-  Serial.println("Connected to Wi-Fi sucessfully.");
-  Serial.print("IP address: ");
-  Serial.println(WiFi.localIP());
-}
-
-void onWifiDisconnect(const WiFiEventStationModeDisconnected& event) {
-  Serial.println("Disconnected from Wi-Fi, trying to connect...");
-  WiFi.disconnect();
-  WiFi.begin(ssid, password);
-}
-
-void setup() {
-  Serial.begin(115200);
-
-  //Register event handlers
-  wifiConnectHandler = WiFi.onStationModeGotIP(onWifiConnect);
-  wifiDisconnectHandler = WiFi.onStationModeDisconnected(onWifiDisconnect);
-   
-  initWiFi();
-  Serial.print("RRSI: ");
-  Serial.println(WiFi.RSSI());
-}
-
-void loop() {
-  //delay(1000);
-}
-
-  
-  
- */

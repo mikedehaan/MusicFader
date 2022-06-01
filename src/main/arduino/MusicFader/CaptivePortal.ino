@@ -5,15 +5,6 @@
 #include <ESP8266mDNS.h>
 #include <EEPROM.h>
 
-/*
-   This example serves a "hello world" on a WLAN and a SoftAP at the same time.
-   The SoftAP allow you to configure WLAN parameters at run time. They are not setup in the sketch but saved on EEPROM.
-   Connect your computer or cell phone to wifi network ESP_ap with password 12345678. A popup may appear and it allow you to go to WLAN config. If it does not then navigate to http://192.168.4.1/wifi and config it there.
-   Then wait for the module to connect to your wifi and take note of the WLAN IP it got. Then you can disconnect from ESP_ap and return to your regular WLAN.
-   Now the ESP8266 is in your network. You can reach it through http://192.168.x.x/ (the IP you took note of) or maybe at http://esp8266.local too.
-   This is a captive portal because through the softAP it will redirect any http request to http://192.168.4.1/
-*/
-
 /* Set these to your desired softAP credentials. They are not configurable at runtime */
 #ifndef APSSID
 #define APSSID "MusicFader"
@@ -86,52 +77,6 @@ void connectWifi() {
 }
 
 void captivePortalLoop() {
-
-/*
-    if (connect) {
-        Serial.println("Connect requested");
-        connect = false;
-        connectWifi();
-        lastConnectTry = millis();
-    }
-
-    unsigned int s = WiFi.status();
-    if (s == 0 && millis() > (lastConnectTry + 60000)) {
-        // If WLAN disconnected and idle try to connect
-        // Don't set retry time too low as retry interfere the softAP operation
-        connect = true;
-    }
-
-    if (status != s) {  // WLAN status change
-        Serial.print("Status: ");
-        Serial.println(s);
-        status = s;
-        if (s == WL_CONNECTED) {
-            // Just connected to WLAN
-            Serial.println("");
-            Serial.print("Connected to ");
-            Serial.println(eepromSavedData.ssid);
-            Serial.print("IP address: ");
-            Serial.println(WiFi.localIP());
-
-            // Setup MDNS responder
-            if (!MDNS.begin(myHostname)) {
-                Serial.println("Error setting up MDNS responder!");
-            } else {
-                Serial.println("mDNS responder started");
-                // Add service to MDNS-SD
-                MDNS.addService("http", "tcp", 80);
-            }
-        } else if (s == WL_NO_SSID_AVAIL) {
-            WiFi.disconnect();
-        }
-    }
-
-    if (s == WL_CONNECTED) {
-        MDNS.update();
-    }
-
-*/
 
     // Do work:
     // DNS
